@@ -42,35 +42,43 @@ function BoldHeaderTemplate({ invoice = {}, company = {} }) {
       {/* ── Full-width header band ───────────────────────────────────────── */}
       <div style={{ backgroundColor: primary, padding: '10mm 12mm', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
 
-        {/* Company block — left */}
-        <div style={{ color: 'white' }}>
-          <div style={{ fontSize: '20pt', fontWeight: 900, letterSpacing: '-0.5px', marginBottom: '2mm' }}>
+        {/* Company block — logo above company name, left side */}
+        <div style={{ color: 'white', display: 'flex', flexDirection: 'column' }}>
+          {logoPath && (
+            <img
+              src={`file://${logoPath}`} alt="logo"
+              style={{
+                maxHeight: '18mm', maxWidth: '44mm',
+                objectFit: 'contain',
+                display: 'block',
+                marginBottom: '3mm',
+                /* light background so logo is visible on dark header */
+                backgroundColor: 'rgba(255,255,255,0.15)',
+                borderRadius: '4px',
+                padding: '1mm',
+              }}
+            />
+          )}
+          <div style={{ fontSize: '20pt', fontWeight: 900, letterSpacing: '-0.5px', marginBottom: '2mm', lineHeight: 1.1 }}>
             {companyName || 'Your Company'}
           </div>
-          <div style={{ fontSize: '8pt', opacity: 0.82, lineHeight: 1.8, whiteSpace: 'pre-line' }}>
+          <div style={{ fontSize: '8pt', opacity: 0.85, lineHeight: 1.8, whiteSpace: 'pre-line' }}>
             {[address, phone && `☏ ${phone}`, email && `✉ ${email}`, website, taxId && `Tax ID: ${taxId}`].filter(Boolean).join('\n')}
           </div>
         </div>
 
-        {/* Invoice meta + optional logo — right */}
-        <div style={{ textAlign: 'right', color: 'white' }}>
-          {logoPath && (
-            <img
-              src={`file://${logoPath}`}
-              alt="logo"
-              style={{ maxHeight: '18mm', maxWidth: '40mm', objectFit: 'contain', marginBottom: '3mm', display: 'block', marginLeft: 'auto' }}
-            />
-          )}
-          <div style={{ fontSize: '18pt', fontWeight: 900, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '2mm', opacity: 0.95 }}>
-            Invoice
+        {/* Invoice meta — right side, white text */}
+        <div style={{ textAlign: 'right', color: 'white', flexShrink: 0 }}>
+          <div style={{ fontSize: '22pt', fontWeight: 900, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '4mm', lineHeight: 1, opacity: 0.95 }}>
+            INVOICE
           </div>
-          <div style={{ fontSize: '8pt', opacity: 0.85, lineHeight: 1.9 }}>
-            <div><span style={{ opacity: 0.7 }}>No. </span><strong>{invoiceNumber}</strong></div>
-            <div><span style={{ opacity: 0.7 }}>Date </span>{date}</div>
-            <div><span style={{ opacity: 0.7 }}>Due  </span><strong>{dueDate}</strong></div>
+          <div style={{ fontSize: '8.5pt', opacity: 0.9, lineHeight: 2 }}>
+            <div><span style={{ opacity: 0.7 }}>No.&nbsp;&nbsp;</span><strong>{invoiceNumber}</strong></div>
+            <div><span style={{ opacity: 0.7 }}>Date&nbsp;</span>{date}</div>
+            {dueDate && <div><span style={{ opacity: 0.7 }}>Due&nbsp;&nbsp;</span><strong>{dueDate}</strong></div>}
           </div>
-          <div style={{ marginTop: '1.5mm', fontSize: '8pt', fontWeight: 700, textTransform: 'capitalize', backgroundColor: headerOverlay, display: 'inline-block', padding: '0.5mm 2.5mm', borderRadius: '3px' }}>
-            {status}
+          <div style={{ marginTop: '2mm', fontSize: '8pt', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', backgroundColor: headerOverlay, display: 'inline-block', padding: '1mm 3mm', borderRadius: '3px' }}>
+            {status === 'final' ? 'PAID' : 'DRAFT'}
           </div>
         </div>
       </div>

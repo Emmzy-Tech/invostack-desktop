@@ -43,29 +43,41 @@ function ModernMinimalTemplate({ invoice = {}, company = {} }) {
 
         {/* ── Header ───────────────────────────────────────────────────────── */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12mm' }}>
-          <div>
+
+          {/* Left: logo above company name + contact */}
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
             {logoPath && (
-              <img src={`file://${logoPath}`} alt="logo" style={{ maxHeight: '16mm', maxWidth: '46mm', objectFit: 'contain', marginBottom: '2.5mm', display: 'block' }} />
+              <img
+                src={`file://${logoPath}`} alt="logo"
+                style={{
+                  maxHeight: '18mm', maxWidth: '48mm',
+                  objectFit: 'contain',
+                  display: 'block',
+                  marginBottom: '3mm',
+                }}
+              />
             )}
-            <div style={{ fontSize: '22pt', fontWeight: 300, color: '#0f172a', letterSpacing: '-0.5px', marginBottom: '2mm' }}>
+            <div style={{ fontSize: '22pt', fontWeight: 300, color: '#0f172a', letterSpacing: '-0.5px', marginBottom: '2mm', lineHeight: 1.1 }}>
               {companyName || 'Your Company'}
             </div>
             <div style={{ fontSize: '8.5pt', color: '#64748b', lineHeight: 1.7, whiteSpace: 'pre-line' }}>
               {[address, phone, email, website, taxId && `Tax ID: ${taxId}`].filter(Boolean).join('\n')}
             </div>
           </div>
-          <div style={{ textAlign: 'right', fontSize: '8.5pt' }}>
-            <div style={{ fontSize: '10pt', fontWeight: 700, color: '#0f172a', marginBottom: '3mm', textTransform: 'uppercase', letterSpacing: '0.12em' }}>
-              Invoice
+
+          {/* Right: INVOICE label + meta, top-aligned */}
+          <div style={{ textAlign: 'right', fontSize: '8.5pt', flexShrink: 0 }}>
+            <div style={{ fontSize: '22pt', fontWeight: 700, color: primary, marginBottom: '4mm', textTransform: 'uppercase', letterSpacing: '0.1em', lineHeight: 1 }}>
+              INVOICE
             </div>
             {[['No.', invoiceNumber], ['Date', date], ['Due', dueDate]].map(([l, v]) => (
-              <div key={l} style={{ display: 'flex', justifyContent: 'flex-end', gap: '8mm', color: '#475569' }}>
+              <div key={l} style={{ display: 'flex', justifyContent: 'flex-end', gap: '8mm', color: '#475569', marginBottom: '1mm' }}>
                 <span style={{ color: '#94a3b8' }}>{l}</span>
                 <span style={{ fontWeight: 600, color: '#0f172a', minWidth: '30mm', textAlign: 'right' }}>{v}</span>
               </div>
             ))}
-            <div style={{ marginTop: '1mm', color: status === 'final' ? '#16a34a' : '#d97706', fontWeight: 600, textTransform: 'capitalize', textAlign: 'right' }}>
-              {status}
+            <div style={{ marginTop: '2mm', color: status === 'final' ? '#16a34a' : '#d97706', fontWeight: 700, textTransform: 'uppercase', fontSize: '8pt', letterSpacing: '0.06em' }}>
+              {status === 'final' ? 'PAID' : 'DRAFT'}
             </div>
           </div>
         </div>

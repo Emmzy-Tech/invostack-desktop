@@ -55,20 +55,29 @@ function DefaultTemplate({ invoice = {}, company = {} }) {
       }}
     >
       {/* ── Header: company left, invoice meta right ───────────────────────── */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10mm' }}>
-        {/* Company block */}
-        <div style={{ maxWidth: '55%' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10mm' }}>
+
+        {/* Company block — logo + name stacked, left-aligned */}
+        <div style={{ maxWidth: '55%', display: 'flex', flexDirection: 'column', gap: '0' }}>
           {logoPath && (
-            <img src={`file://${logoPath}`} alt="logo" style={{ maxHeight: '18mm', maxWidth: '50mm', objectFit: 'contain', marginBottom: '3mm', display: 'block' }} />
+            <img
+              src={`file://${logoPath}`} alt="logo"
+              style={{
+                maxHeight: '20mm', maxWidth: '52mm',
+                objectFit: 'contain',
+                display: 'block',
+                marginBottom: '3mm',
+              }}
+            />
           )}
-          <div style={{ fontSize: '20pt', fontWeight: 800, color: primary, marginBottom: '2mm' }}>
+          <div style={{ fontSize: '20pt', fontWeight: 800, color: primary, marginBottom: '1.5mm', lineHeight: 1.2 }}>
             {companyName || 'Your Company'}
           </div>
           {address && (
-            <div style={{ color: '#64748b', fontSize: '9pt', whiteSpace: 'pre-line' }}>{address}</div>
+            <div style={{ color: '#64748b', fontSize: '9pt', whiteSpace: 'pre-line', marginBottom: '0.5mm' }}>{address}</div>
           )}
           {(phone || email) && (
-            <div style={{ color: '#64748b', fontSize: '9pt', marginTop: '1mm' }}>
+            <div style={{ color: '#64748b', fontSize: '9pt' }}>
               {[phone, email].filter(Boolean).join(' · ')}
             </div>
           )}
@@ -76,10 +85,10 @@ function DefaultTemplate({ invoice = {}, company = {} }) {
           {taxId && <div style={{ color: '#64748b', fontSize: '9pt' }}>Tax ID: {taxId}</div>}
         </div>
 
-        {/* Invoice meta block */}
-        <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: '18pt', fontWeight: 900, color: primary, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '3mm' }}>
-            Invoice
+        {/* Invoice meta block — right-aligned, vertically centered with company block */}
+        <div style={{ textAlign: 'right', flexShrink: 0 }}>
+          <div style={{ fontSize: '22pt', fontWeight: 900, color: primary, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: '4mm', lineHeight: 1 }}>
+            INVOICE
           </div>
           <table style={{ marginLeft: 'auto', fontSize: '9pt', borderCollapse: 'collapse' }}>
             <tbody>
@@ -90,10 +99,10 @@ function DefaultTemplate({ invoice = {}, company = {} }) {
                 ['Status',    status],
               ].map(([label, value]) => (
                 <tr key={label}>
-                  <td style={{ paddingRight: '4mm', color: '#94a3b8', fontWeight: 600, textTransform: 'uppercase', fontSize: '8pt', letterSpacing: '0.05em' }}>
+                  <td style={{ paddingRight: '5mm', paddingBottom: '1mm', color: '#94a3b8', fontWeight: 600, textTransform: 'uppercase', fontSize: '8pt', letterSpacing: '0.05em', textAlign: 'right' }}>
                     {label}
                   </td>
-                  <td style={{ fontWeight: label === 'Invoice #' || label === 'Due Date' ? 700 : 400, color: label === 'Status' ? (status === 'final' ? '#16a34a' : '#d97706') : '#1e293b', textTransform: label === 'Status' ? 'capitalize' : 'none' }}>
+                  <td style={{ paddingBottom: '1mm', fontWeight: label === 'Invoice #' || label === 'Due Date' ? 700 : 400, color: label === 'Status' ? (status === 'final' ? '#16a34a' : '#d97706') : '#1e293b', textTransform: label === 'Status' ? 'capitalize' : 'none', textAlign: 'right' }}>
                     {value}
                   </td>
                 </tr>
