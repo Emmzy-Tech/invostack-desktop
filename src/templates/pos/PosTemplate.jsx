@@ -1,29 +1,42 @@
 /**
  * src/templates/pos/PosTemplate.jsx  — POS 80mm thermal receipt template.
  *
- * THIS IS NOT A SCALED-DOWN A4 TEMPLATE. It is a genuinely different layout:
- *
  * Paper & print spec:
  *   • Roll width: 80mm. Printable area: ~72mm (4mm margins each side).
- *   • CSS @page rule: { size: 80mm auto; margin: 2mm 4mm } — auto height
- *     so the PDF / print output grows with content, never clips.
- *   • The <style> block is embedded inside the component so it's present in
- *     the exported HTML that Electron's print API renders.
+ *   • CSS @page: { size: 80mm auto; margin: 2mm 4mm } — height auto-grows.
+ *   • No background colours — thermal printers print black on white only.
  *
- * Layout rules (matching real thermal receipt conventions):
- *   • Single column, everything left-aligned or centered.
- *   • No wide tables — items are stacked as two lines per row:
- *       Line 1: description
- *       Line 2: qty × rate = amount  (right-aligned)
- *   • Dashed separators (instead of box borders) between sections.
- *   • Small centered logo if logoPath is set (≤ 20mm tall).
- *   • Monospace-adjacent font (Courier New) for numerical alignment.
- *   • No background colours — thermal printers are black on white only.
+ * Design:
+ *   • Clean header block: logo → company name → contact row → bold divider.
+ *   • Receipt-style meta table (INVOICE #, DATE, DUE, STATUS).
+ *   • Itemised table with description + right-aligned amount on same line
+ *     (fits 72mm comfortably without wrapping on most items).
+ *   • Totals block with double-rule grand total for visual weight.
+ *   • Payment details, notes, then a QR code when website is set.
+ *   • "Thank you" sign-off centred at bottom.
  */
 
-const DASH = '- '.repeat(18)  // ~72mm dashed separator line
+import QRCode from '../../components/ui/QRCode.jsx'
 
 const fmt = (n) => Number(n ?? 0).toFixed(2)
+
+/* Solid rule helpers */
+const Rule = ({ thick = false }) => (
+  <div style={{ borderTop: thick ? '2px solid #000' : '1px dashed #aaa', margin: '2mm 0' }} />
+)
+
+/* Single key-value row, monospaced */
+const MetaRow = ({ label, value, bold = false }) => (
+  <div style={{
+    display: 'flex', justifyContent: 'space-between',
+    fontFamily: "'Courier New', Courier, monospace",
+    fontSize: '8pt', fontWeight: bold ? 700 : 400,
+    marginBottom: '0.8mm',
+  }}>
+    <span style={{ color: bold ? '#000' : '#444' }}>{label}</span>
+    <span>{value}</span>
+  </div>
+)
 
 function PosTemplate({ invoice = {}, company = {} }) {
   const {
@@ -31,129 +44,214 @@ function PosTemplate({ invoice = {}, company = {} }) {
     customer = {}, items = [],
     subtotal = 0, taxRate = 0, taxAmount = 0, discount = 0, grandTotal = 0,
     notes = '', termsAndConditions = '',
+    columnHeaders = {},
   } = invoice
 
   const {
-    companyName = '', address = '', phone = '', email = '',
+    companyName = '', address = '', phone = '', email = '', website = '',
     logoPath = '',
     bankDetails: bd = {},
   } = company
 
-  const monoStyle = { fontFamily: "'Courier New', Courier, monospace" }
+  const hdrs = {
+    description: columnHeaders.description || 'Description',
+    quantity:    columnHeaders.quantity    || 'Qty',
+    rate:        columnHeaders.rate        || 'Rate',
+    amount:      columnHeaders.amount      || 'Amt',
+  }
 
-  const row = (label, value, bold = false) => (
-    <div key={label} style={{ display: 'flex', justifyContent: 'space-between', ...monoStyle, fontSize: '8.5pt', fontWeight: bold ? 700 : 400, marginBottom: '0.5mm' }}>
-      <span>{label}</span>
-      <span>{value}</span>
-    </div>
-  )
+  const statusLabel = status === 'final' ? 'PAID / FINAL' : 'DRAFT'
 
   return (
     <>
-      {/*
-        Embedded @page rule — this is the critical piece for correct paper sizing.
-        When Electron calls webContents.print() or printToPDF() with this content:
-          • size: 80mm auto  → sets roll width to exactly 80mm, height grows with content
-          • margin: 2mm 4mm  → 4mm side margins give ~72mm printable width
-        Do NOT change this to A4 — that would defeat the purpose of the POS layout.
-      */}
       <style>{`
         @media print {
           @page { size: 80mm auto; margin: 2mm 4mm; }
-          body   { margin: 0; padding: 0; }
+          body  { margin: 0; padding: 0; }
         }
       `}</style>
 
-      <div style={{ width: '72mm', boxSizing: 'border-box', backgroundColor: '#fff', color: '#000', fontSize: '9pt', fontFamily: "'Courier New', Courier, monospace", lineHeight: 1.4, padding: '2mm 0' }}>
+      <div style={{
+        width: '72mm', boxSizing: 'border-box',
+        backgroundColor: '#fff', color: '#000',
+        fontFamily: "'Courier New', Courier, monospace",
+        fontSize: '9pt', lineHeight: 1.45,
+        padding: '3mm 0 4mm',
+      }}>
 
-        {/* ── Logo (optional, small, centred) ──────────────────────────── */}
+        {/* ── Logo ─────────────────────────────────────────────────── */}
         {logoPath && (
           <div style={{ textAlign: 'center', marginBottom: '2mm' }}>
-            <img src={`file://${logoPath}`} alt="logo" style={{ maxHeight: '14mm', maxWidth: '40mm', objectFit: 'contain' }} />
+            <img
+              src={`file://${logoPath}`} alt="logo"
+              style={{ maxHeight: '16mm', maxWidth: '44mm', objectFit: 'contain' }}
+            />
           </div>
         )}
 
-        {/* ── Company header — centred ──────────────────────────────────── */}
-        <div style={{ textAlign: 'center', marginBottom: '2mm' }}>
-          <div style={{ fontWeight: 700, fontSize: '11pt', marginBottom: '1mm' }}>{companyName || 'Your Company'}</div>
-          {address && <div style={{ fontSize: '8pt', whiteSpace: 'pre-line' }}>{address}</div>}
-          {phone && <div style={{ fontSize: '8pt' }}>{phone}</div>}
-          {email && <div style={{ fontSize: '8pt' }}>{email}</div>}
+        {/* ── Company header ───────────────────────────────────────── */}
+        <div style={{ textAlign: 'center', marginBottom: '2.5mm' }}>
+          <div style={{ fontWeight: 900, fontSize: '12pt', letterSpacing: '0.03em', marginBottom: '1mm' }}>
+            {companyName || 'Your Company'}
+          </div>
+          {address && (
+            <div style={{ fontSize: '7.5pt', color: '#444', whiteSpace: 'pre-line', marginBottom: '0.5mm' }}>
+              {address}
+            </div>
+          )}
+          {/* Contact line: phone · email */}
+          {(phone || email) && (
+            <div style={{ fontSize: '7.5pt', color: '#444' }}>
+              {[phone, email].filter(Boolean).join('  ·  ')}
+            </div>
+          )}
+          {website && (
+            <div style={{ fontSize: '7.5pt', color: '#444', marginTop: '0.5mm' }}>
+              {website}
+            </div>
+          )}
         </div>
 
-        <div style={{ borderTop: '2px solid #000', marginBottom: '1.5mm' }} />
+        <Rule thick />
 
-        {/* ── Invoice meta ─────────────────────────────────────────────── */}
-        {row('INVOICE #', invoiceNumber)}
-        {row('DATE', date)}
-        {row('DUE', dueDate)}
-        {row('STATUS', status.toUpperCase())}
+        {/* ── Invoice meta ─────────────────────────────────────────── */}
+        <div style={{ marginBottom: '1.5mm' }}>
+          <MetaRow label="INVOICE #" value={invoiceNumber} bold />
+          <MetaRow label="DATE"      value={date} />
+          <MetaRow label="DUE DATE"  value={dueDate} />
+          <MetaRow label="STATUS"    value={statusLabel} />
+        </div>
 
-        <div style={{ color: '#555', fontSize: '8pt', margin: '1.5mm 0' }}>{DASH}</div>
-
-        {/* ── Bill To ──────────────────────────────────────────────────── */}
+        {/* ── Bill To ──────────────────────────────────────────────── */}
         {customer.name && (
           <>
-            <div style={{ fontSize: '7.5pt', fontWeight: 700, marginBottom: '0.5mm' }}>BILL TO:</div>
-            <div style={{ fontSize: '8.5pt', fontWeight: 600 }}>{customer.name}</div>
-            {customer.address && <div style={{ fontSize: '8pt', whiteSpace: 'pre-line' }}>{customer.address}</div>}
-            {customer.phone && <div style={{ fontSize: '8pt' }}>{customer.phone}</div>}
+            <Rule />
+            <div style={{ fontSize: '7pt', fontWeight: 700, letterSpacing: '0.08em', marginBottom: '1mm' }}>
+              BILL TO:
+            </div>
+            <div style={{ fontSize: '8.5pt', fontWeight: 700, marginBottom: '0.5mm' }}>{customer.name}</div>
+            {customer.address && (
+              <div style={{ fontSize: '7.5pt', color: '#444', whiteSpace: 'pre-line' }}>{customer.address}</div>
+            )}
+            {customer.phone && <div style={{ fontSize: '7.5pt', color: '#444' }}>{customer.phone}</div>}
+            {customer.email && <div style={{ fontSize: '7.5pt', color: '#444' }}>{customer.email}</div>}
           </>
         )}
 
-        <div style={{ color: '#555', fontSize: '8pt', margin: '1.5mm 0' }}>{DASH}</div>
+        <Rule />
 
-        {/* ── Line items — stacked rows, no wide table ──────────────────── */}
-        <div style={{ marginBottom: '1mm' }}>
+        {/* ── Items table header ───────────────────────────────────── */}
+        <div style={{
+          display: 'flex', justifyContent: 'space-between',
+          fontSize: '7pt', fontWeight: 700, letterSpacing: '0.06em',
+          borderBottom: '1px solid #000', paddingBottom: '1mm', marginBottom: '1mm',
+        }}>
+          <span style={{ flex: 1 }}>{hdrs.description.toUpperCase()}</span>
+          <span style={{ minWidth: '18mm', textAlign: 'right' }}>{hdrs.amount.toUpperCase()}</span>
+        </div>
+
+        {/* ── Items ────────────────────────────────────────────────── */}
+        <div style={{ marginBottom: '1.5mm' }}>
           {items.map((item, idx) => (
             <div key={item.id || idx} style={{ marginBottom: '2mm' }}>
-              {/* Row 1: serial + description */}
-              <div style={{ fontWeight: 400, fontSize: '9pt' }}>
-                {(item.serialNo || idx + 1)}. {item.description || '(no description)'}
+              {/* Description row */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '8.5pt' }}>
+                <span style={{ flex: 1, paddingRight: '2mm' }}>
+                  {(item.serialNo || idx + 1)}. {item.description || '—'}
+                </span>
+                <span style={{ minWidth: '18mm', textAlign: 'right', fontWeight: 600 }}>
+                  {fmt(item.amount)}
+                </span>
               </div>
-              {/* Row 2: qty × rate = amount, right-aligned */}
-              <div style={{ display: 'flex', justifyContent: 'flex-end', fontSize: '8.5pt', color: '#222', fontFamily: "'Courier New', monospace" }}>
-                {item.quantity} × {fmt(item.rate)} = <strong style={{ marginLeft: '2mm' }}>{fmt(item.amount)}</strong>
+              {/* Qty × Rate sub-line */}
+              <div style={{ fontSize: '7.5pt', color: '#555', paddingLeft: '3mm' }}>
+                {item.quantity} {hdrs.quantity.toLowerCase()} × {fmt(item.rate)}
               </div>
             </div>
           ))}
         </div>
 
-        <div style={{ color: '#555', fontSize: '8pt', margin: '1.5mm 0' }}>{DASH}</div>
+        <Rule />
 
-        {/* ── Totals ───────────────────────────────────────────────────── */}
-        {row('Subtotal', fmt(subtotal))}
-        {discount > 0 && row('Discount', `-${fmt(discount)}`)}
-        {row(`Tax (${taxRate}%)`, fmt(taxAmount))}
+        {/* ── Totals ───────────────────────────────────────────────── */}
+        <MetaRow label="Subtotal" value={fmt(subtotal)} />
+        {discount > 0 && <MetaRow label="Discount" value={`-${fmt(discount)}`} />}
+        <MetaRow label={`Tax (${taxRate}%)`} value={fmt(taxAmount)} />
+
         <div style={{ borderTop: '2px solid #000', margin: '1.5mm 0' }} />
-        {row('TOTAL', fmt(grandTotal), true)}
 
-        {/* ── Bank / Payment Details ────────────────────────────────────── */}
+        {/* Grand total — large, prominent */}
+        <div style={{
+          display: 'flex', justifyContent: 'space-between',
+          fontWeight: 900, fontSize: '11pt', marginBottom: '0.5mm',
+        }}>
+          <span>TOTAL</span>
+          <span>{fmt(grandTotal)}</span>
+        </div>
+
+        <div style={{ borderTop: '2px solid #000', marginBottom: '1.5mm' }} />
+
+        {/* ── Bank / Payment Details ────────────────────────────────── */}
         {(bd.bankName || bd.accountNumber) && (
           <>
-            <div style={{ color: '#555', fontSize: '8pt', margin: '1.5mm 0' }}>{DASH}</div>
-            <div style={{ fontSize: '7.5pt', fontWeight: 700, marginBottom: '1mm' }}>PAYMENT DETAILS:</div>
-            {[['Bank', bd.bankName], ['Acct Name', bd.accountName], ['Acct No.', bd.accountNumber], ['SWIFT', bd.swiftCode], ['IBAN', bd.iban]].filter(([, v]) => v).map(([l, v]) => (
-              <div key={l} style={{ fontSize: '8pt', display: 'flex', gap: '2mm' }}>
-                <span style={{ minWidth: '16mm', color: '#555' }}>{l}:</span>
-                <span>{v}</span>
+            <div style={{ fontSize: '7pt', fontWeight: 700, letterSpacing: '0.08em', marginBottom: '1mm' }}>
+              PAYMENT DETAILS:
+            </div>
+            {[
+              ['Bank',     bd.bankName],
+              ['Acct',     bd.accountName],
+              ['Acct No.', bd.accountNumber],
+              ['SWIFT',    bd.swiftCode],
+              ['IBAN',     bd.iban],
+              ['Routing',  bd.routingNumber],
+              ['Sort',     bd.sortCode],
+            ].filter(([, v]) => v).map(([l, v]) => (
+              <div key={l} style={{ display: 'flex', fontSize: '7.5pt', marginBottom: '0.5mm' }}>
+                <span style={{ minWidth: '14mm', color: '#555' }}>{l}:</span>
+                <span style={{ fontWeight: 600 }}>{v}</span>
               </div>
             ))}
+            <Rule />
           </>
         )}
 
-        {/* ── Notes ────────────────────────────────────────────────────── */}
+        {/* ── Notes ────────────────────────────────────────────────── */}
         {notes && (
           <>
-            <div style={{ color: '#555', fontSize: '8pt', margin: '1.5mm 0' }}>{DASH}</div>
-            <div style={{ fontSize: '8pt', whiteSpace: 'pre-line' }}>{notes}</div>
+            <div style={{ fontSize: '7.5pt', color: '#444', whiteSpace: 'pre-line', marginBottom: '1.5mm' }}>
+              {notes}
+            </div>
+            <Rule />
           </>
         )}
 
-        {/* ── Footer ───────────────────────────────────────────────────── */}
-        <div style={{ borderTop: '2px solid #000', margin: '2mm 0' }} />
-        <div style={{ textAlign: 'center', fontSize: '8pt' }}>Thank you for your business!</div>
-        <div style={{ borderTop: '1px solid #000', marginTop: '2mm' }} />
+        {/* ── Terms ────────────────────────────────────────────────── */}
+        {termsAndConditions && (
+          <>
+            <div style={{ fontSize: '7pt', fontWeight: 700, letterSpacing: '0.08em', marginBottom: '0.5mm' }}>
+              TERMS:
+            </div>
+            <div style={{ fontSize: '7pt', color: '#555', whiteSpace: 'pre-line', marginBottom: '1.5mm' }}>
+              {termsAndConditions}
+            </div>
+            <Rule />
+          </>
+        )}
+
+        {/* ── QR Code + website label ───────────────────────────────── */}
+        {website && (
+          <div style={{ textAlign: 'center', marginBottom: '2mm' }}>
+            <QRCode url={website} size={80} style={{ margin: '0 auto 1.5mm' }} />
+            <div style={{ fontSize: '7pt', color: '#444' }}>{website}</div>
+          </div>
+        )}
+
+        {/* ── Footer sign-off ───────────────────────────────────────── */}
+        <Rule thick />
+        <div style={{ textAlign: 'center', fontSize: '8.5pt', fontWeight: 700, letterSpacing: '0.04em', marginBottom: '1mm' }}>
+          Thank you for your business!
+        </div>
+        <Rule />
       </div>
     </>
   )

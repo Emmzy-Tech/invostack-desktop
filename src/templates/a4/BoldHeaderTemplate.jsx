@@ -12,6 +12,8 @@
  * Paper: 210mm × ≥297mm A4 with mm inline styles for cross-OS print accuracy.
  */
 
+import QRCode from '../../components/ui/QRCode.jsx'
+
 const fmt = (n) => Number(n ?? 0).toFixed(2)
 
 function BoldHeaderTemplate({ invoice = {}, company = {} }) {
@@ -142,6 +144,17 @@ function BoldHeaderTemplate({ invoice = {}, company = {} }) {
           <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '4mm', display: 'grid', gridTemplateColumns: notes && termsAndConditions ? '1fr 1fr' : '1fr', gap: '6mm', fontSize: '8.5pt', color: '#64748b' }}>
             {notes && <div><div style={{ fontWeight: 700, textTransform: 'uppercase', fontSize: '7.5pt', letterSpacing: '0.08em', color: '#94a3b8', marginBottom: '1.5mm' }}>Notes</div><p style={{ whiteSpace: 'pre-line', margin: 0 }}>{notes}</p></div>}
             {termsAndConditions && <div><div style={{ fontWeight: 700, textTransform: 'uppercase', fontSize: '7.5pt', letterSpacing: '0.08em', color: '#94a3b8', marginBottom: '1.5mm' }}>Terms</div><p style={{ whiteSpace: 'pre-line', margin: 0 }}>{termsAndConditions}</p></div>}
+          </div>
+        )}
+
+        {/* ── QR Code footer ────────────────────────────────────────────────── */}
+        {website && (
+          <div style={{ borderTop: '1px solid #e2e8f0', marginTop: '6mm', paddingTop: '4mm', display: 'flex', alignItems: 'center', gap: '4mm' }}>
+            <QRCode url={website} size={64} style={{ borderRadius: '4px', border: `2px solid ${primary}`, padding: '2px' }} />
+            <div style={{ fontSize: '8pt' }}>
+              <div style={{ fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', fontSize: '7.5pt', color: '#94a3b8', marginBottom: '1mm' }}>Visit us online</div>
+              <div style={{ color: primary, fontWeight: 700 }}>{website}</div>
+            </div>
           </div>
         )}
       </div>

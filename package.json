@@ -17,6 +17,7 @@
   "dependencies": {
     "clsx": "^2.1.1",
     "lucide-react": "^0.400.0",
+    "qrcode": "^1.5.4",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.26.0",
@@ -46,9 +47,16 @@
       "dist/**/*",
       "dist-electron/**/*"
     ],
-
     "mac": {
-      "target": [{ "target": "dmg", "arch": ["arm64", "x64"] }],
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "arm64",
+            "x64"
+          ]
+        }
+      ],
       "icon": "build/icons/icon.icns",
       "category": "public.app-category.business",
       "darkModeSupport": true,
@@ -56,20 +64,31 @@
       "gatekeeperAssess": false,
       "identity": null
     },
-
     "win": {
-      "target": [{ "target": "nsis", "arch": ["x64"] }],
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
       "icon": "build/icons/icon.png",
       "signingHashAlgorithms": null,
       "sign": null
     },
-
     "linux": {
-      "target": [{ "target": "AppImage", "arch": ["x64"] }],
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
       "icon": "build/icons/icon.png",
       "category": "Office"
     },
-
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,

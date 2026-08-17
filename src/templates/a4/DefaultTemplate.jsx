@@ -18,6 +18,8 @@
  *   (thead/tfoot display:table-header-group — enforced by the browser).
  */
 
+import QRCode from '../../components/ui/QRCode.jsx'
+
 /** Format a number to 2 decimal places, handling null/undefined safely. */
 const fmt = (n) => Number(n ?? 0).toFixed(2)
 
@@ -204,6 +206,17 @@ function DefaultTemplate({ invoice = {}, company = {} }) {
               <p style={{ whiteSpace: 'pre-line', margin: 0 }}>{termsAndConditions}</p>
             </div>
           )}
+        </div>
+      )}
+
+      {/* ── QR Code footer ───────────────────────────────────────────────────── */}
+      {website && (
+        <div style={{ borderTop: '1px solid #e2e8f0', marginTop: '6mm', paddingTop: '5mm', display: 'flex', alignItems: 'center', gap: '5mm' }}>
+          <QRCode url={website} size={64} />
+          <div style={{ fontSize: '8pt', color: '#94a3b8' }}>
+            <div style={{ fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '1mm' }}>Visit us online</div>
+            <div style={{ color: primary, fontWeight: 600 }}>{website}</div>
+          </div>
         </div>
       )}
     </div>

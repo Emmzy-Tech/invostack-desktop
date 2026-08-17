@@ -12,6 +12,8 @@
  * DefaultTemplate so print dimensions are OS-consistent.
  */
 
+import QRCode from '../../components/ui/QRCode.jsx'
+
 const fmt = (n) => Number(n ?? 0).toFixed(2)
 
 function ModernMinimalTemplate({ invoice = {}, company = {} }) {
@@ -134,6 +136,17 @@ function ModernMinimalTemplate({ invoice = {}, company = {} }) {
           <div style={{ borderTop: hairline, paddingTop: '4mm', display: 'grid', gridTemplateColumns: notes && termsAndConditions ? '1fr 1fr' : '1fr', gap: '6mm', fontSize: '8.5pt', color: '#64748b' }}>
             {notes && <div><div style={{ fontWeight: 700, textTransform: 'uppercase', fontSize: '7.5pt', letterSpacing: '0.08em', color: '#94a3b8', marginBottom: '1.5mm' }}>Notes</div><p style={{ whiteSpace: 'pre-line', margin: 0 }}>{notes}</p></div>}
             {termsAndConditions && <div><div style={{ fontWeight: 700, textTransform: 'uppercase', fontSize: '7.5pt', letterSpacing: '0.08em', color: '#94a3b8', marginBottom: '1.5mm' }}>Terms</div><p style={{ whiteSpace: 'pre-line', margin: 0 }}>{termsAndConditions}</p></div>}
+          </div>
+        )}
+
+        {/* ── QR Code footer ────────────────────────────────────────────────── */}
+        {website && (
+          <div style={{ borderTop: hairline, marginTop: '6mm', paddingTop: '4mm', display: 'flex', alignItems: 'center', gap: '4mm' }}>
+            <QRCode url={website} size={64} />
+            <div style={{ fontSize: '8pt', color: '#94a3b8' }}>
+              <div style={{ fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', fontSize: '7.5pt', marginBottom: '1mm' }}>Visit us online</div>
+              <div style={{ color: primary, fontWeight: 500 }}>{website}</div>
+            </div>
           </div>
         )}
       </div>
