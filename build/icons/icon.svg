@@ -1,0 +1,26 @@
+<!--
+  InvoStack icon mark — standalone, square.
+  Motif: three stacked document/invoice sheets offset diagonally, suggesting
+  a stack of invoices. Front sheet has content-line silhouettes.
+  Palette: indigo-600 (#4F46E5) front, indigo-400 (#818CF8) back layers.
+  ViewBox 100×100 — rsvg-convert scales losslessly to any raster size.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <!-- Back sheet — furthest, lightest -->
+  <rect x="28" y="30" width="62" height="54" rx="7" fill="#818CF8"/>
+
+  <!-- Middle sheet -->
+  <rect x="17" y="20" width="62" height="54" rx="7" fill="#6366F1"/>
+
+  <!-- Front sheet — primary indigo -->
+  <rect x="6"  y="10" width="62" height="54" rx="7" fill="#4F46E5"/>
+
+  <!-- Content lines — simulate invoice text/rows on the front sheet -->
+  <rect x="16" y="22" width="36" height="4" rx="2" fill="white" opacity="0.85"/>
+  <rect x="16" y="31" width="28" height="4" rx="2" fill="white" opacity="0.60"/>
+  <rect x="16" y="40" width="32" height="4" rx="2" fill="white" opacity="0.60"/>
+  <rect x="16" y="49" width="20" height="4" rx="2" fill="white" opacity="0.35"/>
+
+  <!-- Thin rule — mimics a subtotal divider line -->
+  <rect x="16" y="57" width="42" height="2"  rx="1" fill="white" opacity="0.22"/>
+</svg>

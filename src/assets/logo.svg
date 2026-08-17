@@ -1,0 +1,39 @@
+<!--
+  InvoStack full brand lockup — icon mark + wordmark.
+  Used in: app title bar area, About panel, marketing/splash screens.
+  ViewBox 230×58. The icon mark occupies the left 48px; the wordmark fills
+  the remaining width. Both elements are horizontally centred on the vertical axis.
+
+  Wordmark typography:
+    "Invo" — weight 700, slate-900 (#0F172A) — reads as the product category
+    "Stack" — weight 800, indigo-600 (#4F46E5) — the brand differentiator
+  Font: system-ui stack (no external CDN; works offline on all platforms).
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 230 58" fill="none">
+
+  <!-- ── Icon mark (scaled ~0.48× from the 100×100 master) ───────────────── -->
+  <g transform="translate(0, 4)">
+    <!-- Back sheet -->
+    <rect x="14" y="14" width="30" height="26" rx="3.5" fill="#818CF8"/>
+    <!-- Middle sheet -->
+    <rect x="9"  y="10" width="30" height="26" rx="3.5" fill="#6366F1"/>
+    <!-- Front sheet -->
+    <rect x="3"  y="5"  width="30" height="26" rx="3.5" fill="#4F46E5"/>
+    <!-- Content lines -->
+    <rect x="7"  y="10" width="17" height="2" rx="1" fill="white" opacity="0.85"/>
+    <rect x="7"  y="15" width="13" height="2" rx="1" fill="white" opacity="0.60"/>
+    <rect x="7"  y="20" width="15" height="2" rx="1" fill="white" opacity="0.60"/>
+    <rect x="7"  y="25" width="10" height="2" rx="1" fill="white" opacity="0.35"/>
+  </g>
+
+  <!-- ── Wordmark ─────────────────────────────────────────────────────────── -->
+  <text
+    x="52"
+    y="40"
+    font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif"
+    font-size="30"
+    letter-spacing="-0.5"
+  >
+    <tspan font-weight="700" fill="#0F172A">Invo</tspan><tspan font-weight="800" fill="#4F46E5">Stack</tspan>
+  </text>
+</svg>

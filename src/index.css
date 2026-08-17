@@ -1,0 +1,61 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  *,*::before,*::after { box-sizing: border-box; }
+
+  html, body, #root {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    @apply antialiased text-gray-900;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter',
+                 system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    background: #f8fafc;
+  }
+
+  /* Refined scrollbars */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { @apply bg-gray-200 rounded-full; }
+  ::-webkit-scrollbar-thumb:hover { @apply bg-gray-300; }
+
+  /* Number inputs — remove native spinners */
+  input[type=number]::-webkit-inner-spin-button,
+  input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+  input[type=number] { -moz-appearance: textfield; }
+}
+
+@layer components {
+  /* Shared input base used across the app */
+  .inp {
+    @apply w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm
+           text-gray-900 placeholder-gray-400
+           focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent
+           transition-all duration-150;
+  }
+  .inp-sm {
+    @apply inp px-2.5 py-1.5 text-xs;
+  }
+  /* Card surface */
+  .card {
+    @apply bg-white rounded-2xl border border-gray-100 shadow-sm;
+  }
+  /* Section label */
+  .section-label {
+    @apply text-xs font-semibold text-gray-400 uppercase tracking-widest;
+  }
+}
+
+@layer utilities {
+  @media print {
+    .no-print { display: none !important; }
+  }
+  .tabular { font-variant-numeric: tabular-nums; }
+}
