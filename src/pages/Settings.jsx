@@ -375,13 +375,31 @@ export default function Settings() {
                           placeholder="0"
                         />
                       </Field>
-                      <Field label="Currency Code" hint="ISO 4217 e.g. USD, EUR, GBP, NGN.">
-                        <TextInput
-                          value={tpl.currency}
-                          onChange={(v) => upTpl({ currency: v.toUpperCase() })}
-                          placeholder="USD"
-                          mono
-                        />
+                      <Field label="Currency" hint="Symbol shown on all invoices and receipts.">
+                        <select
+                          value={tpl.currency || 'NGN'}
+                          onChange={(e) => upTpl({ currency: e.target.value })}
+                          className="inp"
+                        >
+                          {[
+                            ['NGN', '₦  Nigerian Naira (NGN)'],
+                            ['USD', '$  US Dollar (USD)'],
+                            ['EUR', '€  Euro (EUR)'],
+                            ['GBP', '£  British Pound (GBP)'],
+                            ['GHS', '₵  Ghanaian Cedi (GHS)'],
+                            ['KES', 'KSh  Kenyan Shilling (KES)'],
+                            ['ZAR', 'R  South African Rand (ZAR)'],
+                            ['CAD', 'CA$  Canadian Dollar (CAD)'],
+                            ['AUD', 'A$  Australian Dollar (AUD)'],
+                            ['INR', '₹  Indian Rupee (INR)'],
+                            ['JPY', '¥  Japanese Yen (JPY)'],
+                            ['CNY', '¥  Chinese Yuan (CNY)'],
+                            ['AED', 'د.إ  UAE Dirham (AED)'],
+                            ['SAR', '﷼  Saudi Riyal (SAR)'],
+                          ].map(([code, label]) => (
+                            <option key={code} value={code}>{label}</option>
+                          ))}
+                        </select>
                       </Field>
                     </div>
                   </Card>

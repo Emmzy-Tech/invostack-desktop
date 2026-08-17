@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Calculator } from 'lucide-react'
+import { formatCurrency } from '../../lib/calculations.js'
 
 /**
  * String-based number input to allow full delete-and-retype behaviour.
@@ -38,11 +39,11 @@ function TotalsSection({
   taxAmount = 0,
   discount = 0,
   grandTotal = 0,
-  currency = 'USD',
+  currency = 'NGN',
   onChangeTaxRate,
   onChangeDiscount,
 }) {
-  const fmt = (n) => Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+  const fmt = (n) => formatCurrency(n, currency)
 
   const row = 'flex items-center justify-between text-sm text-gray-600 py-1.5'
 
@@ -84,7 +85,6 @@ function TotalsSection({
               style={{ background: 'linear-gradient(135deg,#7c3aed,#4f46e5)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
               {fmt(grandTotal)}
             </span>
-            <span className="block text-xs text-gray-400 mt-0.5">{currency}</span>
           </div>
         </div>
       </div>

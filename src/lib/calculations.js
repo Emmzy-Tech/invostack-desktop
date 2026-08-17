@@ -66,20 +66,38 @@ export function recalcInvoice(invoice) {
 }
 
 /**
- * Format a number as a locale-aware currency string.
- * Falls back to plain toFixed(2) if Intl is unavailable.
- * @param {number} value
- * @param {string} [currency='USD']
- * @param {string} [locale='en-US']
+ * Maps ISO 4217 currency codes to their display symbols.
+ * Intl.NumberFormat uses full code text (e.g. "NGN 1,500.00") for currencies
+ * that the en-US locale doesn't recognise by symbol, so we resolve symbols
+ * explicitly here and format the number separately.
  */
-export function formatCurrency(value, currency = 'USD', locale = 'en-US') {
-  try {
-    return new Intl.NumberFormat(locale, {
-      style: 'currency',
-      currency,
-      minimumFractionDigits: 2,
-    }).format(value ?? 0)
-  } catch {
-    return Number(value ?? 0).toFixed(2)
-  }
+const CURRENCY_SYMBOLS = {
+  NGN: '₦',
+  USD: '$',
+  EUR: '€',
+  GBP: '£',
+  GHS: '₵',
+  KES: 'KSh',
+  ZAR: 'R',
+  CAD: 'CA$',
+  AUD: 'A$',
+  INR: '₹',
+  JPY: '¥',
+  CNY: '¥',
+  AED: 'د.إ',
+  SAR: '﷼',
+}
+
+/**
+ * Format a number with the correct currency symbol.
+ * @param {number} value
+ * @param {string} [currency='NGN']
+ */
+export function formatCurrency(value, currency = 'NGN') {
+  const symbol = CURRENCY_SYMBOLS[currency] ?? currency
+  const number = Number(value ?? 0).toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })
+  return `${symbol}${number}`
 }

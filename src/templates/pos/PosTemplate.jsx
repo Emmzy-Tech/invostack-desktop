@@ -9,9 +9,7 @@
  */
 
 import QRCode from '../../components/ui/QRCode.jsx'
-
-const fmtC = (n) =>
-  Number(n ?? 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+import { formatCurrency } from '../../lib/calculations.js'
 
 /* ─── Dividers ───────────────────────────────────────────────────────────── */
 const SolidRule = ({ thick = false, style = {} }) => (
@@ -43,7 +41,10 @@ function PosTemplate({ invoice = {}, company = {} }) {
     subtotal = 0, taxRate = 0, taxAmount = 0, discount = 0, grandTotal = 0,
     notes = '', termsAndConditions = '',
     columnHeaders = {},
+    currency = 'NGN',
   } = invoice
+
+  const fmtC = (n) => formatCurrency(n, currency)
 
   const {
     companyName = '', address = '', phone = '', email = '', website = '',

@@ -13,8 +13,7 @@
  */
 
 import QRCode from '../../components/ui/QRCode.jsx'
-
-const fmt = (n) => Number(n ?? 0).toFixed(2)
+import { formatCurrency } from '../../lib/calculations.js'
 
 function BoldHeaderTemplate({ invoice = {}, company = {} }) {
   const {
@@ -22,7 +21,10 @@ function BoldHeaderTemplate({ invoice = {}, company = {} }) {
     customer = {}, items = [],
     subtotal = 0, taxRate = 0, taxAmount = 0, discount = 0, grandTotal = 0,
     notes = '', termsAndConditions = '',
+    currency = 'NGN',
   } = invoice
+
+  const fmt = (n) => formatCurrency(n, currency)
 
   const {
     companyName = '', address = '', phone = '', email = '', website = '', taxId = '',

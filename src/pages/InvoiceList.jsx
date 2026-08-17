@@ -41,7 +41,7 @@ function InvoiceList() {
   const [dateTo,    setDateTo]    = useState('')
   const hasFilters = query || statusFilter !== 'all' || dateFrom || dateTo
 
-  const currency = profile?.invoiceTemplate?.currency || 'USD'
+  const currency = profile?.invoiceTemplate?.currency || 'NGN'
 
   // Stats
   const totalRevenue = invoices.filter(i => i.status === 'final')

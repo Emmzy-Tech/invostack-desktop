@@ -19,9 +19,7 @@
  */
 
 import QRCode from '../../components/ui/QRCode.jsx'
-
-/** Format a number to 2 decimal places, handling null/undefined safely. */
-const fmt = (n) => Number(n ?? 0).toFixed(2)
+import { formatCurrency } from '../../lib/calculations.js'
 
 function DefaultTemplate({ invoice = {}, company = {} }) {
   const {
@@ -29,7 +27,10 @@ function DefaultTemplate({ invoice = {}, company = {} }) {
     customer = {}, items = [],
     subtotal = 0, taxRate = 0, taxAmount = 0, discount = 0, grandTotal = 0,
     notes = '', termsAndConditions = '',
+    currency = 'NGN',
   } = invoice
+
+  const fmt = (n) => formatCurrency(n, currency)
 
   const {
     companyName = '', address = '', phone = '', email = '', website = '', taxId = '',

@@ -285,7 +285,7 @@ function InvoiceEditor() {
               taxAmount={currentInvoice.taxAmount}
               discount={currentInvoice.discount}
               grandTotal={currentInvoice.grandTotal}
-              currency={currentInvoice.currency || profile?.invoiceTemplate?.currency || 'USD'}
+              currency={currentInvoice.currency || profile?.invoiceTemplate?.currency || 'NGN'}
               onChangeTaxRate={(taxRate) => updateCurrentInvoice({ taxRate })}
               onChangeDiscount={(discount) => updateCurrentInvoice({ discount })}
             />

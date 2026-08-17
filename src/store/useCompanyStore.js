@@ -30,7 +30,7 @@ export const DEFAULT_INVOICE_TEMPLATE = {
   // Default financial settings
   taxRate:  0,
   discount: 0,
-  currency: 'USD',
+  currency: 'NGN',
   // Default text blocks
   notes:              '',
   termsAndConditions: '',
