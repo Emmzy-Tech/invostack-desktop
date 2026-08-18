@@ -37,17 +37,18 @@ const printPayloads = new Map()
  * the print:ready IPC before we call print() / printToPDF().
  */
 function createPrintWindow(token) {
-  const isWindows = process.platform === 'win32'
-
   const win = new BrowserWindow({
     width:  1200,
     height: 900,
-    // On Windows we must show the window (off-screen) so the compositor paints.
-    // On macOS/Linux show:false works fine because the offscreen compositor runs.
-    show: isWindows,
-    x: isWindows ? -10000 : undefined,
-    y: isWindows ? -10000 : undefined,
-    skipTaskbar: true,        // never appear in the Windows taskbar
+    // Always show the window off-screen so Chromium's compositor produces a
+    // real painted frame on every platform.  This is required on Windows
+    // (RAF stalls in a never-shown window) and on macOS/Linux the native print
+    // dialog needs a rendered frame to generate the preview thumbnail — it
+    // cannot pull content from a show:false window.
+    show: true,
+    x: -10000,
+    y: -10000,
+    skipTaskbar: true,        // never appear in the taskbar / Dock
     webPreferences: {
       preload: join(__dirname, 'preload.js'),
       contextIsolation: true,
@@ -229,30 +230,22 @@ ipcMain.handle('print:invoice', async (_event, { invoice, company }) => {
       })
     })
 
-    const isPOS = invoice.paperSize === 'POS80'
-
-    // Build print options.
-    // NOTE: On Windows, passing pageSize:undefined throws an internal Chromium
-    // error.  For POS we omit pageSize entirely and let the CSS @page rule drive
-    // the dimensions; for A4 we set it explicitly.
-    const printOptions = {
-      silent: false,          // always show the native OS print dialog
-      printBackground: true,
-      margins: { marginType: 'none' },
-      ...(isPOS ? {} : { pageSize: 'A4' }),
-    }
-
-    // Open the native OS print dialog.
-    await new Promise((resolve, reject) => {
-      win.webContents.print(printOptions, (success, errorType) => {
-        // 'cancelled' means the user closed the dialog — not an error.
-        if (!success && errorType !== 'cancelled') {
-          reject(new Error(`Print failed: ${errorType}`))
-        } else {
-          resolve()
-        }
-      })
-    })
+    // Trigger Chromium's built-in print dialog (with full page preview) from
+    // the renderer via window.print().  This is intentionally different from
+    // win.webContents.print(), which on Windows opens the bare Win32 system
+    // dialog that has no content-preview pane.
+    //
+    // executeJavaScript awaits a returned Promise, so we wrap window.print()
+    // in one that resolves on the standard 'afterprint' DOM event — fired by
+    // Chromium when the dialog closes, whether the user printed or cancelled.
+    // Passing userGesture=true lets window.print() run without a gesture check.
+    await win.webContents.executeJavaScript(
+      `new Promise((resolve) => {
+        window.addEventListener('afterprint', () => resolve(), { once: true });
+        window.print();
+      })`,
+      true /* userGesture */,
+    )
 
     return { printed: true }
   } finally {
