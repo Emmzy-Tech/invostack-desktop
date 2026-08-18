@@ -28,12 +28,26 @@ const printPayloads = new Map()
 /**
  * Create a hidden BrowserWindow that loads the /print route.
  * Returns the window; the caller is responsible for destroying it.
+ *
+ * Windows note: Chromium's compositor does not paint into a window that has
+ * never been shown, so requestAnimationFrame in the renderer stalls forever on
+ * Windows when show:false is used.  We work around this by showing the window
+ * off-screen (position -10000,-10000) so Chromium actually composites a frame,
+ * then rely on the ready-signal / setTimeout fallback in PrintView.jsx to fire
+ * the print:ready IPC before we call print() / printToPDF().
  */
 function createPrintWindow(token) {
+  const isWindows = process.platform === 'win32'
+
   const win = new BrowserWindow({
-    width: 1200,
+    width:  1200,
     height: 900,
-    show: false,        // never visible to the user
+    // On Windows we must show the window (off-screen) so the compositor paints.
+    // On macOS/Linux show:false works fine because the offscreen compositor runs.
+    show: isWindows,
+    x: isWindows ? -10000 : undefined,
+    y: isWindows ? -10000 : undefined,
+    skipTaskbar: true,        // never appear in the Windows taskbar
     webPreferences: {
       preload: join(__dirname, 'preload.js'),
       contextIsolation: true,
@@ -44,11 +58,9 @@ function createPrintWindow(token) {
   const printHash = `#/print?token=${token}`
 
   if (process.env.VITE_DEV_SERVER_URL) {
-    // Strip trailing slash before appending the hash.
     const base = process.env.VITE_DEV_SERVER_URL.replace(/\/$/, '')
     win.loadURL(`${base}/${printHash}`)
   } else {
-    // app.getAppPath() resolves correctly inside an asar archive.
     win.loadFile(join(app.getAppPath(), 'dist/index.html'), { hash: `/print?token=${token}` })
   }
 
@@ -219,24 +231,27 @@ ipcMain.handle('print:invoice', async (_event, { invoice, company }) => {
 
     const isPOS = invoice.paperSize === 'POS80'
 
+    // Build print options.
+    // NOTE: On Windows, passing pageSize:undefined throws an internal Chromium
+    // error.  For POS we omit pageSize entirely and let the CSS @page rule drive
+    // the dimensions; for A4 we set it explicitly.
+    const printOptions = {
+      silent: false,          // always show the native OS print dialog
+      printBackground: true,
+      margins: { marginType: 'none' },
+      ...(isPOS ? {} : { pageSize: 'A4' }),
+    }
+
     // Open the native OS print dialog.
     await new Promise((resolve, reject) => {
-      win.webContents.print(
-        {
-          silent: false,        // always show print dialog
-          printBackground: true,
-          // For POS the OS dialog is pre-set; CSS @page drives actual size.
-          pageSize: isPOS ? undefined : 'A4',
-          margins: { marginType: 'none' },
-        },
-        (success, errorType) => {
-          if (!success && errorType !== 'cancelled') {
-            reject(new Error(`Print failed: ${errorType}`))
-          } else {
-            resolve()
-          }
+      win.webContents.print(printOptions, (success, errorType) => {
+        // 'cancelled' means the user closed the dialog — not an error.
+        if (!success && errorType !== 'cancelled') {
+          reject(new Error(`Print failed: ${errorType}`))
+        } else {
+          resolve()
         }
-      )
+      })
     })
 
     return { printed: true }

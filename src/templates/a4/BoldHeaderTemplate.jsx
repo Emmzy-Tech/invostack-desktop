@@ -79,9 +79,7 @@ function BoldHeaderTemplate({ invoice = {}, company = {} }) {
             <div><span style={{ opacity: 0.7 }}>Date&nbsp;</span>{date}</div>
             {dueDate && <div><span style={{ opacity: 0.7 }}>Due&nbsp;&nbsp;</span><strong>{dueDate}</strong></div>}
           </div>
-          <div style={{ marginTop: '2mm', fontSize: '8pt', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', backgroundColor: headerOverlay, display: 'inline-block', padding: '1mm 3mm', borderRadius: '3px' }}>
-            {status === 'final' ? 'PAID' : 'DRAFT'}
-          </div>
+
         </div>
       </div>
 

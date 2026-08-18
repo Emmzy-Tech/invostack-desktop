@@ -59,8 +59,7 @@ function PosTemplate({ invoice = {}, company = {} }) {
     amount:      (columnHeaders.amount      || 'Amt').toUpperCase(),
   }
 
-  const isPaid = status === 'final'
-  const font   = "Arial, 'Helvetica Neue', Helvetica, sans-serif"
+  const font = "Arial, 'Helvetica Neue', Helvetica, sans-serif"
 
   /* ── bank detail row ── */
   const BankRow = ({ label, value }) =>
@@ -185,20 +184,6 @@ function PosTemplate({ invoice = {}, company = {} }) {
           </div>
           <div style={{ fontSize: '8pt', color: '#444', marginTop: '1mm', letterSpacing: '0.05em' }}>
             No. <strong>{invoiceNumber}</strong>
-          </div>
-          {/* Status badge */}
-          <div style={{
-            display: 'inline-block',
-            marginTop: '2mm',
-            padding: '0.8mm 4mm',
-            border: `1.5px solid ${isPaid ? '#111' : '#999'}`,
-            borderRadius: '2px',
-            fontSize: '7pt',
-            fontWeight: 700,
-            letterSpacing: '0.1em',
-            color: isPaid ? '#111' : '#888',
-          }}>
-            {isPaid ? 'PAID' : 'DRAFT'}
           </div>
         </div>
 

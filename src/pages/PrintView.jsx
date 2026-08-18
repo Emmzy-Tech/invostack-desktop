@@ -80,13 +80,25 @@ export default function PrintView() {
   useEffect(() => {
     if (!payload) return
 
-    // requestAnimationFrame ensures Chromium has actually painted the template
-    // before we tell the main process to capture the PDF / open the print dialog.
-    const raf = requestAnimationFrame(() => {
+    // On Windows, hidden (show:false) BrowserWindows may never fire a paint
+    // event, so requestAnimationFrame can stall indefinitely. We use RAF first
+    // for accuracy (it fires immediately when the window is visible / offscreen)
+    // but back it up with a guaranteed setTimeout so the signal always fires.
+    let sent = false
+    const send = () => {
+      if (sent) return
+      sent = true
       window.electronAPI.print.ready(payload.token)
-    })
+    }
 
-    return () => cancelAnimationFrame(raf)
+    const raf = requestAnimationFrame(send)
+    // 800 ms safety net — well within the 10 s main-process timeout.
+    const timer = setTimeout(send, 800)
+
+    return () => {
+      cancelAnimationFrame(raf)
+      clearTimeout(timer)
+    }
   }, [payload])
 
   if (error) {

@@ -78,9 +78,7 @@ function ModernMinimalTemplate({ invoice = {}, company = {} }) {
                 <span style={{ fontWeight: 600, color: '#0f172a', minWidth: '30mm', textAlign: 'right' }}>{v}</span>
               </div>
             ))}
-            <div style={{ marginTop: '2mm', color: status === 'final' ? '#16a34a' : '#d97706', fontWeight: 700, textTransform: 'uppercase', fontSize: '8pt', letterSpacing: '0.06em' }}>
-              {status === 'final' ? 'PAID' : 'DRAFT'}
-            </div>
+
           </div>
         </div>
 

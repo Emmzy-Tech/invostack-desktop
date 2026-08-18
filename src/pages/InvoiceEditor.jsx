@@ -164,12 +164,48 @@ function InvoiceEditor() {
 
       {/* ── Content ──────────────────────────────────────────────────────────── */}
       {showPreview ? (
-        <div className="flex-1 overflow-auto p-8 flex justify-center" style={{ background: '#e2e8f0' }}>
+        <div
+          className="flex-1 overflow-auto"
+          style={{ background: '#cbd5e1' }}
+        >
           {(() => {
-            const { Component } = getTemplate(currentInvoice.templateId)
+            const { Component, paperSize } = getTemplate(currentInvoice.templateId)
+            const isPOS = paperSize === 'POS80' || currentInvoice.paperSize === 'POS80'
+
+            if (isPOS) {
+              /* POS: natural width (~76mm ≈ 287px at 96dpi), centred, full height scrollable */
+              return (
+                <div style={{ minHeight: '100%', display: 'flex', justifyContent: 'center', alignItems: 'flex-start', padding: '32px 24px' }}>
+                  <div style={{ background: '#fff', boxShadow: '0 8px 40px rgba(0,0,0,0.18)', borderRadius: '4px' }}>
+                    <Component invoice={currentInvoice} company={profile} />
+                  </div>
+                </div>
+              )
+            }
+
+            /* A4: scale to fit the preview pane width so it's always fully visible */
             return (
-              <div className="shadow-2xl rounded-sm overflow-hidden">
-                <Component invoice={currentInvoice} company={profile} />
+              <div style={{ minHeight: '100%', display: 'flex', justifyContent: 'center', alignItems: 'flex-start', padding: '32px 24px' }}>
+                {/* Scale wrapper: A4 is 794px wide at 96dpi (210mm).
+                    We let the browser shrink it via zoom so it always fits. */}
+                <div
+                  style={{
+                    /* Use zoom (supported in Chromium/Electron) to scale the
+                       fixed-width A4 template down to fit the available pane.
+                       calc accounts for the 48px horizontal padding above.    */
+                    zoom: 'min(1, calc((100vw - 240px - 48px) / 794px))',
+                    transformOrigin: 'top center',
+                    background: '#fff',
+                    boxShadow: '0 8px 40px rgba(0,0,0,0.18)',
+                    borderRadius: '4px',
+                    /* Keep the wrapper exactly as wide as the A4 content (794px)
+                       so the shadow/background don't bleed outside the template. */
+                    width: 'fit-content',
+                    lineHeight: 1,
+                  }}
+                >
+                  <Component invoice={currentInvoice} company={profile} />
+                </div>
               </div>
             )
           })()}

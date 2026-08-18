@@ -97,13 +97,12 @@ function DefaultTemplate({ invoice = {}, company = {} }) {
                 ['Invoice #', invoiceNumber],
                 ['Date',      date],
                 ['Due Date',  dueDate],
-                ['Status',    status],
               ].map(([label, value]) => (
                 <tr key={label}>
                   <td style={{ paddingRight: '5mm', paddingBottom: '1mm', color: '#94a3b8', fontWeight: 600, textTransform: 'uppercase', fontSize: '8pt', letterSpacing: '0.05em', textAlign: 'right' }}>
                     {label}
                   </td>
-                  <td style={{ paddingBottom: '1mm', fontWeight: label === 'Invoice #' || label === 'Due Date' ? 700 : 400, color: label === 'Status' ? (status === 'final' ? '#16a34a' : '#d97706') : '#1e293b', textTransform: label === 'Status' ? 'capitalize' : 'none', textAlign: 'right' }}>
+                  <td style={{ paddingBottom: '1mm', fontWeight: label === 'Invoice #' || label === 'Due Date' ? 700 : 400, color: '#1e293b', textAlign: 'right' }}>
                     {value}
                   </td>
                 </tr>
